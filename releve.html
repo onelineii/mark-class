@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classique Mark | Relevé de compte</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #f4f6f5; font-family: 'Segoe UI', sans-serif; color: #333; }
+        .tab-btn { color: #94a3b8; font-weight: 800; border-bottom: 3px solid transparent; transition: 0.2s; }
+        /* Thème Classique Mark : Vert émeraude */
+        .tab-btn.active { color: #28a745; border-bottom-color: #28a745; }
+        .releve-card { background: white; border-radius: 18px; border: 1px solid #e2e8f0; transition: 0.3s; }
+        .status-pending { color: #f59e0b; background: #fffbeb; }
+        .status-success { color: #10b981; background: #ecfdf5; }
+        .status-failed { color: #ef4444; background: #fef2f2; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <div class="bg-white p-5 flex items-center shadow-sm sticky top-0 z-50 border-b border-slate-100">
+        <a href="compte.html" class="text-slate-400 mr-4 active:scale-90 transition-transform">
+            <i class="fa-solid fa-arrow-left text-xl"></i>
+        </a>
+        <h1 class="text-lg font-black text-slate-800 uppercase tracking-tight">Relevé de compte</h1>
+    </div>
+
+    <!-- Filtres de l'historique -->
+    <div class="bg-white flex justify-around border-b border-slate-100 sticky top-[73px] z-40">
+        <button onclick="filterRecords('all', this)" class="tab-btn active px-4 py-4 text-[10px] uppercase tracking-wider">Tout</button>
+        <button onclick="filterRecords('RECHARGE', this)" class="tab-btn px-4 py-4 text-[10px] uppercase tracking-wider">Recharges</button>
+        <button onclick="filterRecords('RETRAIT', this)" class="tab-btn px-4 py-4 text-[10px] uppercase tracking-wider">Retraits</button>
+    </div>
+
+    <div class="p-5">
+        <div id="loadingOrEmptyMessage" class="text-center py-28 flex flex-col items-center">
+            <div class="mb-5">
+                <i class="fa-solid fa-receipt text-6xl text-slate-200 mb-2"></i>
+                <i class="fa-solid fa-circle-notch fa-spin text-[#28a745] text-sm opacity-60"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-400 italic">Chargement de l'historique...</p>
+        </div>
+
+        <div id="recordsContainer" class="hidden space-y-4"></div>
+    </div>
+
+    <script>
+        const DB_URL = "https://alibaba-f22a0-default-rtdb.firebaseio.com";
+        const loggedUserPhone = localStorage.getItem('userPhone');
+        
+        let allRecords = [];
+
+        async function fetchAllHistory() {
+            if (!loggedUserPhone) return window.location.href = "index.html";
+
+            try {
+                allRecords = [];
+
+                // 1. Récupérer les demandes EN ATTENTE (Dossiers recharges et retraits)
+                const [resRec, resRet] = await Promise.all([
+                    fetch(`${DB_URL}/recharges.json`),
+                    fetch(`${DB_URL}/retraits.json`)
+                ]);
+
+                const dataRec = await resRec.json();
+                const dataRet = await resRet.json();
+
+                if (dataRec) {
+                    Object.values(dataRec).forEach(rec => {
+                        if (rec.phone === loggedUserPhone) {
+                            allRecords.push({ ...rec, type: 'RECHARGE', statut: 'En attente' });
+                        }
+                    });
+                }
+
+                if (dataRet) {
+                    Object.values(dataRet).forEach(ret => {
+                        if (ret.phone === loggedUserPhone) {
+                            allRecords.push({ ...ret, type: 'RETRAIT', statut: 'En attente' });
+                        }
+                    });
+                }
+
+                // 2. Récupérer l'HISTORIQUE VALIDÉ (Dossier spécifique à l'utilisateur)
+                const resHist = await fetch(`${DB_URL}/users/${loggedUserPhone}/relevés.json`);
+                const dataHist = await resHist.json();
+
+                if (dataHist) {
+                    Object.values(dataHist).forEach(hist => {
+                        allRecords.push(hist);
+                    });
+                }
+
+                // Tri par date décroissante
+                allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                renderUI(allRecords);
+
+            } catch (e) {
+                console.error("Erreur relevé:", e);
+                document.getElementById('loadingOrEmptyMessage').innerHTML = '<p class="text-red-500 font-bold">Erreur de connexion</p>';
+            }
+        }
+
+        function renderUI(records) {
+            const container = document.getElementById('recordsContainer');
+            const msg = document.getElementById('loadingOrEmptyMessage');
+
+            if (records.length === 0) {
+                container.classList.add('hidden');
+                msg.classList.remove('hidden');
+                msg.innerHTML = '<i class="fa-solid fa-receipt text-6xl text-slate-200 mb-4"></i><p class="text-sm font-bold text-slate-400 italic">Aucune transaction trouvée.</p>';
+                return;
+            }
+
+            msg.classList.add('hidden');
+            container.classList.remove('hidden');
+
+            container.innerHTML = records.map(rec => {
+                const isRecharge = rec.type === 'RECHARGE';
+                const valMontant = rec.montant || rec.amount || 0;
+                const statusClass = rec.statut === 'En attente' ? 'status-pending' : (rec.statut === 'Validé' ? 'status-success' : 'status-failed');
+                
+                // Indicateurs visuels : Vert pour recharge, Gris ardoise/sombre pour retrait (style Classique Mark)
+                const icon = isRecharge ? 'fa-arrow-down-long text-emerald-500' : 'fa-arrow-up-long text-slate-500';
+                const amountPrefix = isRecharge ? '+' : '-';
+                const amountColor = isRecharge ? 'text-emerald-600' : 'text-slate-800';
+
+                return `
+                    <div class="releve-card p-4 flex items-center justify-between border-l-4 ${isRecharge ? 'border-l-emerald-500' : 'border-l-slate-400'}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                                <i class="fa-solid ${icon}"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-[11px] font-black uppercase text-slate-800 tracking-tight">${rec.type}</h3>
+                                <p class="text-[9px] font-bold text-slate-400">${rec.date || 'Date inconnue'}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black ${amountColor}">${amountPrefix} FC ${valMontant.toLocaleString()}</p>
+                            <span class="text-[8px] font-black uppercase px-2 py-1 rounded-full ${statusClass}">${rec.statut || 'En attente'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterRecords(type, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (type === 'all') {
+                renderUI(allRecords);
+            } else {
+                renderUI(allRecords.filter(r => r.type === type));
+            }
+        }
+
+        window.onload = fetchAllHistory;
+    </script>
+</body>
+</html>
