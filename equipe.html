@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classique Mark | Équipe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #f4f6f5; font-family: 'Segoe UI', sans-serif; color: #333; }
+        .bg-custom-green { background: #28a745; }
+        .text-custom-green { color: #28a745; }
+        .btn-copy { background: #4a5568; color: white; border-radius: 6px; font-weight: bold; transition: 0.2s; }
+        .btn-copy:active { transform: scale(0.9); }
+        .card-team { background: #ffffff; border: 1px solid #ced4da; border-radius: 12px; }
+        .lvl-badge { background: #4a5568; color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+    </style>
+</head>
+<body class="pb-32">
+
+    <!-- En-tête avec image de marque -->
+    <div class="w-full h-44 overflow-hidden shadow-sm relative">
+        <img src="IMG_5327.jpeg" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="absolute top-4 right-4 bg-white/90 text-[#28a745] px-3 py-1 rounded-md text-[10px] font-black uppercase shadow-sm">
+            Mon Équipe
+        </div>
+    </div>
+
+    <div class="px-4 mt-4 space-y-3">
+        <div class="bg-custom-green p-5 rounded-2xl shadow-lg text-white">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <p id="inviteCode" class="text-2xl font-black tracking-tighter italic">......</p>
+                    <p class="text-[9px] uppercase font-bold opacity-80 tracking-widest">Mon Code d'invitation</p>
+                </div>
+                <button onclick="copierCode()" class="btn-copy px-5 py-2 text-[10px] uppercase shadow-md">Copier</button>
+            </div>
+            
+            <div class="h-[1px] bg-white/20 my-4"></div>
+
+            <div class="flex justify-between items-center">
+                <div class="truncate mr-4">
+                    <p id="inviteLink" class="text-[10px] opacity-90 truncate italic">https://elec-invest.github.io/italien/inscription.html?c=...</p>
+                    <p class="text-[9px] uppercase font-bold opacity-80 tracking-widest">Lien de parrainage officiel</p>
+                </div>
+                <button onclick="copierLien()" class="btn-copy px-5 py-2 text-[10px] uppercase shadow-md">Copier</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Niveaux de Commission -->
+    <div class="px-4 mt-6 space-y-3" id="teamLevelsContainer">
+        <!-- LV1 -->
+        <div class="card-team p-4 flex items-center justify-between shadow-sm border-l-4 border-l-emerald-500">
+            <div class="lvl-badge text-xs italic">LV1</div>
+            <div class="text-center">
+                <p class="text-[11px] font-black text-emerald-600">35%</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Com.</p>
+            </div>
+            <div class="text-center">
+                <p id="countLV1" class="text-[12px] font-black text-slate-800 italic">0</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Membres</p>
+            </div>
+            <div class="text-right">
+                <p id="bonusLV1" class="text-[11px] font-black text-slate-800">FC 0</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Gains</p>
+            </div>
+        </div>
+
+        <!-- LV2 -->
+        <div class="card-team p-4 flex items-center justify-between shadow-sm border-l-4 border-l-slate-600">
+            <div class="lvl-badge text-xs italic">LV2</div>
+            <div class="text-center">
+                <p class="text-[11px] font-black text-emerald-600">2%</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Com.</p>
+            </div>
+            <div class="text-center">
+                <p id="countLV2" class="text-[12px] font-black text-slate-800 italic">0</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Membres</p>
+            </div>
+            <div class="text-right">
+                <p id="bonusLV2" class="text-[11px] font-black text-slate-800">FC 0</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Gains</p>
+            </div>
+        </div>
+
+        <!-- LV3 -->
+        <div class="card-team p-4 flex items-center justify-between shadow-sm border-l-4 border-l-slate-400">
+            <div class="lvl-badge text-xs italic">LV3</div>
+            <div class="text-center">
+                <p class="text-[11px] font-black text-emerald-600">1%</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Com.</p>
+            </div>
+            <div class="text-center">
+                <p id="countLV3" class="text-[12px] font-black text-slate-800 italic">0</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Membres</p>
+            </div>
+            <div class="text-right">
+                <p id="bonusLV3" class="text-[11px] font-black text-slate-800">FC 0</p>
+                <p class="text-[8px] uppercase text-slate-400 font-bold">Gains</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-4 mt-6 grid grid-cols-2 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 text-center shadow-sm">
+            <p id="totalTeamSize" class="text-xl font-black text-slate-800 italic">0</p>
+            <p class="text-[9px] uppercase font-black text-slate-400 mt-1 tracking-tighter">Taille de l'équipe</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 text-center shadow-sm">
+            <p id="totalCommission" class="text-xl font-black text-[#28a745] italic">FC 0</p>
+            <p class="text-[9px] uppercase font-black text-slate-400 mt-1 tracking-tighter">Total Commissions</p>
+        </div>
+    </div>
+
+    <!-- Navigation bas de page -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white p-4 flex justify-around items-center z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <a href="dashboard.html" class="flex flex-col items-center text-slate-400">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Maison</span>
+        </a>
+        <a href="produit.html" class="flex flex-col items-center text-slate-400">
+            <i class="fa-solid fa-bag-shopping text-xl"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Produit</span>
+        </a>
+        <a href="equipe.html" class="flex flex-col items-center text-[#28a745]">
+            <i class="fa-solid fa-users text-xl"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Équipe</span>
+        </a>
+        <a href="compte.html" class="flex flex-col items-center text-slate-400">
+            <i class="fa-solid fa-user text-xl"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Le mien</span>
+        </a>
+    </nav>
+
+    <script>
+        const DB_URL = "https://alibaba-f22a0-default-rtdb.firebaseio.com/users";
+        const userPhone = localStorage.getItem('userPhone');
+        
+        const baseUrl = "https://elec-invest.github.io/italien/inscription.html";
+
+        async function loadTeamData() {
+            if (!userPhone) return window.location.href = "index.html";
+
+            const myCode = userPhone.substring(userPhone.length - 6).toUpperCase();
+            document.getElementById('inviteCode').innerText = myCode;
+            document.getElementById('inviteLink').innerText = `${baseUrl}?c=${myCode}`;
+
+            try {
+                const response = await fetch(`${DB_URL}.json`);
+                const allUsers = await response.json();
+
+                if (allUsers) {
+                    let lv1 = 0, lv2 = 0, lv3 = 0;
+                    let comLV1 = 0, comLV2 = 0, comLV3 = 0;
+                    const usersArray = Object.values(allUsers);
+
+                    usersArray.forEach(u => {
+                        if (u.referredBy === myCode) {
+                            lv1++;
+                            comLV1 += (u.totalInvested || 0) * 0.35;
+                            
+                            const uCode = u.phone.substring(u.phone.length - 6).toUpperCase();
+                            usersArray.forEach(subU => {
+                                if (subU.referredBy === uCode) {
+                                    lv2++;
+                                    comLV2 += (subU.totalInvested || 0) * 0.02;
+
+                                    const subUCode = subU.phone.substring(subU.phone.length - 6).toUpperCase();
+                                    usersArray.forEach(lastU => {
+                                        if (lastU.referredBy === subUCode) {
+                                            lv3++;
+                                            comLV3 += (lastU.totalInvested || 0) * 0.01;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                    document.getElementById('countLV1').innerText = lv1;
+                    document.getElementById('bonusLV1').innerText = `FC ${Math.floor(comLV1).toLocaleString()}`;
+                    document.getElementById('countLV2').innerText = lv2;
+                    document.getElementById('bonusLV2').innerText = `FC ${Math.floor(comLV2).toLocaleString()}`;
+                    document.getElementById('countLV3').innerText = lv3;
+                    document.getElementById('bonusLV3').innerText = `FC ${Math.floor(comLV3).toLocaleString()}`;
+                    document.getElementById('totalTeamSize').innerText = lv1 + lv2 + lv3;
+                    document.getElementById('totalCommission').innerText = `FC ${Math.floor(comLV1 + comLV2 + comLV3).toLocaleString()}`;
+                }
+            } catch (e) { console.error("Erreur team Classique Mark:", e); }
+        }
+
+        function copierCode() {
+            navigator.clipboard.writeText(document.getElementById('inviteCode').innerText);
+            alert("Code Classique Mark copié !");
+        }
+
+        function copierLien() {
+            navigator.clipboard.writeText(document.getElementById('inviteLink').innerText);
+            alert("Lien de parrainage Classique Mark copié !");
+        }
+
+        window.onload = loadTeamData;
+    </script>
+</body>
+</html>
