@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classique Mark - Connexion</title>
+    <style>
+        /* Design Vert et Gris cohérent avec Inscription */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f6f5; /* Fond gris très clair */
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        .login-container { 
+            background-color: white; 
+            padding: 40px 25px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.1); 
+            width: 90%; 
+            max-width: 400px; 
+            text-align: center; 
+            border-top: 5px solid #28a745; /* Ligne verte distinctive */
+        }
+        h1 { 
+            color: #28a745; /* Titre Vert */
+            margin-bottom: 5px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        p { 
+            color: #6c757d; /* Texte descriptif Gris */
+            margin-bottom: 25px; 
+            font-size: 15px; 
+        }
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 12px 0; 
+            border: 1.5px solid #ced4da; /* Bordure grise standard */
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            transition: border-color 0.3s;
+            background-color: #f8f9fa; /* Fond d'input gris clair */
+        }
+        input:focus {
+            outline: none;
+            border-color: #28a745; /* Focus Vert */
+            background-color: #fff;
+        }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background-color: #28a745; /* Bouton Vert */
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 17px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #218838; /* Vert plus foncé au survol */
+        }
+        button:disabled { 
+            background-color: #e9ecef; 
+            color: #6c757d;
+        }
+        .register-link { 
+            margin-top: 25px; 
+            font-size: 14px; 
+            color: #6c757d; /* Texte Gris */
+        }
+        .register-link a { 
+            color: #28a745; /* Lien Vert */
+            text-decoration: none; 
+            font-weight: bold; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h1>Classique Mark</h1>
+        <p>Connectez-vous à votre espace membre</p>
+        
+        <form id="loginForm">
+            <input type="tel" id="phone" placeholder="Numéro (ex: +243...)" pattern="^\+243[0-9]{9}$" required>
+            <input type="password" id="pass" placeholder="Votre mot de passe" required>
+            <button type="submit" id="loginBtn">Se connecter</button>
+        </form>
+
+        <div class="register-link">
+            Pas encore de compte ? <a href="inscription.html">Créer un compte</a>
+        </div>
+    </div>
+
+    <script>
+        // Utilisation de votre base de données Firebase (Inchangée)
+        const DB_URL = "https://alibaba-f22a0-default-rtdb.firebaseio.com/users";
+
+        document.getElementById('loginForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const phone = document.getElementById('phone').value.replace('+', '').trim();
+            const pass = document.getElementById('pass').value;
+
+            btn.disabled = true;
+            btn.innerText = "Vérification en cours...";
+
+            try {
+                const response = await fetch(`${DB_URL}/${phone}.json`);
+                const user = await response.json();
+
+                if (!user) {
+                    alert("Ce numéro n'est pas reconnu par Classique Mark.");
+                } else if (user.password !== pass) {
+                    alert("Mot de passe incorrect.");
+                } else {
+                    // Connexion réussie
+                    localStorage.setItem('userPhone', phone);
+                    window.location.href = "dashboard.html";
+                }
+            } catch (err) {
+                alert("Erreur de connexion. Vérifiez votre accès internet.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Se connecter";
+            }
+        };
+    </script>
+</body>
+</html>
