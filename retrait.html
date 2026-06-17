@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classique Mark | Retrait</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #f4f6f5; font-family: 'Segoe UI', sans-serif; }
+        .btn-retrait { background: linear-gradient(90deg, #28a745, #218838); color: white; }
+        .btn-disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.6; }
+        .info-box { border-left: 4px solid #28a745; }
+        .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <div class="bg-white p-5 flex items-center shadow-sm">
+        <a href="compte.html" class="text-slate-400 mr-4 active:scale-90 transition-transform">
+            <i class="fa-solid fa-arrow-left text-xl"></i>
+        </a>
+        <h1 class="text-lg font-black text-slate-800 uppercase tracking-tight">Retrait de fonds</h1>
+    </div>
+
+    <div class="p-5">
+        <div id="vipCheckBar" class="bg-white p-4 rounded-2xl shadow-sm mb-4 flex justify-between items-center">
+            <span class="text-xs font-bold text-slate-500">Statut de compte :</span>
+            <span id="vipStatusBadge" class="status-badge bg-slate-100 text-slate-400 uppercase italic">Vérification...</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 info-box">
+            <h2 class="text-[11px] font-black text-[#28a745] uppercase mb-2">Règles de retrait Classique Mark</h2>
+            <ul class="text-[10px] text-slate-600 space-y-1 font-bold">
+                <li><i class="fa-solid fa-wallet mr-2"></i>Mon Solde : <span id="currentBalanceDisplay" class="text-slate-900 italic">FC 0</span></li>
+                <li><i class="fa-solid fa-clock mr-2"></i>Heures : 09:00 — 17:00 (RDC)</li>
+                <li><i class="fa-solid fa-minus-circle mr-2"></i>Retrait minimum : 4 200 FC</li>
+                <li><i class="fa-solid fa-percentage mr-2"></i>Frais de service : 12%</li>
+            </ul>
+        </div>
+
+        <div id="formContainer" class="bg-white p-6 rounded-3xl shadow-sm">
+            <form id="withdrawalForm" class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Montant à retirer (FC)</label>
+                    <input type="number" id="amount" placeholder="Minimum 4200" 
+                           class="w-full p-4 bg-slate-50 rounded-2xl border-none text-lg font-black outline-none focus:ring-2 focus:ring-[#28a745]" 
+                           min="4200" required>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl space-y-2">
+                    <div class="flex justify-between text-[11px] font-bold text-slate-500">
+                        <span>Frais (12%) :</span>
+                        <span id="feesDisplay">0 FC</span>
+                    </div>
+                    <div class="flex justify-between text-xs font-black text-slate-800 border-t pt-2">
+                        <span>Net à recevoir :</span>
+                        <span id="netAmount" class="text-[#28a745]">0 FC</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Réseau de réception</label>
+                    <select id="network" class="w-full p-4 bg-slate-50 rounded-2xl border-none text-sm font-bold outline-none focus:ring-2 focus:ring-[#28a745]" required>
+                        <option value="">Sélectionner...</option>
+                        <option value="Orange Money">Orange Money</option>
+                        <option value="Airtel Money">Airtel Money</option>
+                        <option value="M-Pesa">M-Pesa (Vodacom)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Numéro de réception</label>
+                    <input type="tel" id="userPhoneInput" placeholder="Ex: 089..." 
+                           class="w-full p-4 bg-slate-50 rounded-2xl border-none text-sm font-bold outline-none focus:ring-2 focus:ring-[#28a745]" required>
+                </div>
+
+                <div id="timeStatus" class="text-center mb-2"></div>
+                
+                <button type="submit" id="submitBtn" class="w-full btn-retrait py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-95">
+                    Confirmer le retrait
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const DB_URL = "https://alibaba-f22a0-default-rtdb.firebaseio.com";
+        const loggedUserPhone = localStorage.getItem('userPhone');
+        
+        let userCurrentBalance = 0;
+
+        async function initWithdrawal() {
+            if (!loggedUserPhone) return window.location.href = "index.html";
+
+            try {
+                const res = await fetch(`${DB_URL}/users/${loggedUserPhone}.json`);
+                const user = await res.json();
+
+                if (user) {
+                    userCurrentBalance = parseFloat(user.balance) || 0;
+                    document.getElementById('currentBalanceDisplay').innerText = `FC ${userCurrentBalance.toLocaleString()}`;
+                    
+                    if (user.vipActive) {
+                        document.getElementById('vipStatusBadge').innerText = "Éligible (VIP)";
+                        document.getElementById('vipStatusBadge').className = "status-badge bg-green-100 text-green-600 uppercase";
+                        checkTime();
+                    } else {
+                        lockForm("Achat VIP requis");
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function lockForm(msg) {
+            const form = document.getElementById('withdrawalForm');
+            const btn = document.getElementById('submitBtn');
+            const badge = document.getElementById('vipStatusBadge');
+            form.classList.add('opacity-40', 'pointer-events-none');
+            btn.classList.add('btn-disabled');
+            btn.innerText = msg;
+            badge.innerText = "Non Éligible";
+            badge.className = "status-badge bg-red-100 text-red-600 uppercase";
+        }
+
+        function checkTime() {
+            const hour = new Date().getHours();
+            if (hour < 9 || hour >= 17) {
+                const btn = document.getElementById('submitBtn');
+                btn.classList.add('btn-disabled');
+                document.getElementById('timeStatus').innerHTML = '<span class="text-red-500 text-[10px] font-bold italic">Fermé (Ouvert de 09h à 17h)</span>';
+            }
+        }
+
+        document.getElementById('amount').addEventListener('input', function() {
+            const val = parseFloat(this.value) || 0;
+            const fees = val * 0.12; // Modifié à 12%
+            const net = val - fees;
+            document.getElementById('feesDisplay').innerText = Math.floor(fees).toLocaleString() + " FC";
+            document.getElementById('netAmount').innerText = (net > 0 ? Math.floor(net) : 0).toLocaleString() + " FC";
+        });
+
+        document.getElementById('withdrawalForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const network = document.getElementById('network').value;
+            const receiverPhone = document.getElementById('userPhoneInput').value;
+
+            if (amount < 4200) return alert("Le minimum est de 4 200 FC.");
+            if (amount > userCurrentBalance) return alert("Solde insuffisant !");
+
+            if (confirm(`Retirer FC ${amount.toLocaleString()} ?`)) {
+                try {
+                    // 1. Déduire le solde
+                    const nouveauSolde = userCurrentBalance - amount;
+                    await fetch(`${DB_URL}/users/${loggedUserPhone}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ balance: nouveauSolde })
+                    });
+
+                    // 2. Envoyer au dossier 'retraits'
+                    const requestData = {
+                        phone: loggedUserPhone,
+                        montant: amount,
+                        reseau: network,
+                        expediteur: receiverPhone,
+                        date: new Date().toLocaleString('fr-FR'),
+                        statut: "En attente",
+                        type: "RETRAIT"
+                    };
+
+                    await fetch(`${DB_URL}/retraits.json`, {
+                        method: 'POST',
+                        body: JSON.stringify(requestData)
+                    });
+
+                    alert("Demande de retrait envoyée avec succès !");
+                    window.location.href = "compte.html";
+                } catch (e) { 
+                    alert("Erreur de connexion."); 
+                }
+            }
+        };
+
+        window.onload = initWithdrawal;
+    </script>
+</body>
+</html>
