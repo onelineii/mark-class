@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classique Mark | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #f4f6f5; font-family: 'Segoe UI', sans-serif; color: #333; }
+        /* Style Vert et Gris */
+        .bg-custom-green { background: #28a745; }
+        .text-custom-green { color: #28a745; }
+        .btn-white { background: white; border-radius: 20px; color: #28a745; border: 1px solid #28a745; transition: 0.3s; }
+        .btn-white:hover { background: #28a745; color: white; }
+        .nav-bottom { background: white; border-top: 1px solid #e2e8f0; border-radius: 0; }
+        .card-stats { background: white; border-radius: 2rem; border: 1px solid #28a745; color: #28a745; }
+        
+        /* Style de l'annonce (Pop-up) */
+        .modal-overlay {
+            display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; color: #333; width: 90%; max-width: 380px;
+            border-radius: 25px; padding: 25px; text-align: center; position: relative;
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- Annonce avec bouton WhatsApp -->
+    <div id="announcementModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-xl font-black text-[#28a745] mb-4 uppercase italic tracking-tighter">Annonce Classique Mark</h2>
+            <p class="text-[13px] font-bold mb-4 text-slate-700 leading-relaxed">
+                Bienvenue sur Classique Mark. 
+                Rejoignez notre communauté sur WhatsApp pour profiter pleinement de nos publications et recevoir des bonus exclusifs en tant que membre de la plateforme.
+            </p>
+            <a href="https://chat.whatsapp.com/IrQSrIHMpK21OjLKvlhs3A?mode=gi_t" target="_blank" class="block w-full py-4 bg-[#25D366] text-white rounded-2xl font-bold mb-3 shadow-lg text-center active:scale-95 transition-all">
+                <i class="fa-brands fa-whatsapp mr-2 text-xl"></i> Rejoindre WhatsApp
+            </a>
+            <button onclick="closeModal()" class="text-xs font-black text-slate-400 uppercase tracking-widest mt-4 active:scale-95 transition-all">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Bannière -->
+    <div class="w-full h-48 overflow-hidden">
+        <img src="IMG_5327.jpeg" class="w-full h-full object-cover" alt="Banner">
+    </div>
+
+    <div class="px-5 mt-6">
+        <div class="card-stats p-6 grid grid-cols-2 gap-4 text-center shadow-lg">
+            <div>
+                <p id="userBalance" class="text-xl font-black italic">FC ...</p>
+                <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest text-slate-500">Solde du compte</p>
+            </div>
+            <div>
+                <p id="totalRevenue" class="text-xl font-black italic">FC 0.00</p>
+                <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest text-slate-500">Revenu total</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-5 mt-4">
+        <div class="bg-white p-3 rounded-2xl flex items-center border border-slate-100 shadow-sm">
+            <i class="fa-solid fa-bell text-[#28a745] mr-3"></i>
+            <marquee class="text-[12px] font-bold text-slate-600">Bienvenue sur Classique Mark ! Profitez des meilleurs équipements d'investissement...</marquee>
+        </div>
+    </div>
+
+    <div class="px-5 mt-4">
+        <div class="bg-white rounded-3xl p-6 grid grid-cols-3 gap-2 text-center text-[#28a745] shadow-xl">
+            <a href="recharge.html" class="flex flex-col items-center btn-white p-3">
+                <div class="w-12 h-12 flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
+                </div>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Recharger</span>
+            </a>
+            <a href="retrait.html" class="flex flex-col items-center btn-white p-3">
+                <div class="w-12 h-12 flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-wallet text-2xl"></i>
+                </div>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Retrait</span>
+            </a>
+            <a href="https://chat.whatsapp.com/DTLG3bO4QDjAdUJind6rNB?mode=gi_t" class="flex flex-col items-center btn-white p-3">
+                <div class="w-12 h-12 flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-headset text-2xl"></i>
+                </div>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Service</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="px-5 mt-6">
+        <div class="rounded-3xl overflow-hidden border border-slate-100 shadow-lg">
+            <img src="IMG_5327.jpeg" class="w-full h-auto">
+        </div>
+    </div>
+
+    <!-- Barre de navigation du bas -->
+    <nav class="fixed bottom-0 left-0 right-0 nav-bottom p-4 flex justify-around items-center z-50 shadow-inner">
+        <a href="dashboard.html" class="flex flex-col items-center text-[#28a745]">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Maison</span>
+        </a>
+        <a href="produit.html" class="flex flex-col items-center text-slate-400">
+            <i class="fa-solid fa-bag-shopping text-xl"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Produit</span>
+        </a>
+        <a href="equipe.html" class="flex flex-col items-center text-slate-400">
+            <i class="fa-solid fa-users text-xl"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Équipe</span>
+        </a>
+        <a href="compte.html" class="flex flex-col items-center text-slate-400">
+            <i class="fa-solid fa-user text-xl"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Le mien</span>
+        </a>
+    </nav>
+
+    <script>
+        // CONFIGURATION FIREBASE - URL d'origine conservée avec soin
+        const DB_URL = "https://alibaba-f22a0-default-rtdb.firebaseio.com/users";
+        const userPhone = localStorage.getItem('userPhone');
+
+        function closeModal() {
+            document.getElementById('announcementModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            let modal = document.getElementById('announcementModal');
+            if (event.target == modal) closeModal();
+        }
+
+        async function fetchUserData() {
+            if (!userPhone) {
+                window.location.href = "index.html"; 
+                return;
+            }
+
+            try {
+                const response = await fetch(`${DB_URL}/${userPhone}.json`);
+                const user = await response.json();
+
+                if (user) {
+                    document.getElementById('userBalance').innerText = `FC ${parseFloat(user.balance).toLocaleString()}`;
+                }
+            } catch (error) {
+                console.error("Erreur de récupération:", error);
+                document.getElementById('userBalance').innerText = "Erreur";
+            }
+        }
+
+        window.onload = fetchUserData;
+    </script>
+</body>
+</html>
