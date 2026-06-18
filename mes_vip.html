@@ -54,7 +54,6 @@
         
         const dailyGains = { 1: 2300, 2: 5200, 3: 13500, 4: 19000, 5: 28000, 6: 42000, 7: 77000, 8: 96000, 9: 148000, 10: 258000 };
 
-        // Assure-toi que ces noms d'images correspondent exactement à tes fichiers dans le dossier du projet
         const productImages = {
             1: "IMG_5323.jpeg", 2: "IMG_5324.jpeg", 3: "IMG_5325.jpeg", 
             4: "IMG_5326.jpeg", 5: "IMG_5327.jpeg", 6: "IMG_5328.jpeg",
@@ -72,7 +71,11 @@
                     const vipId = user.vipActive;
                     const gain = dailyGains[vipId] || 0;
                     const img = productImages[vipId] || "IMG_5327.jpeg";
-                    const lastCollect = user.lastHarvest || 0; 
+                    
+                    // Si lastHarvest n'existe pas, on prend la date d'achat du produit (buyTime)
+                    // Cela garantit que le premier revenu s'ouvre exactement 24h après l'achat.
+                    const initialReferenceTime = user.buyTime || Date.now();
+                    const lastCollect = user.lastHarvest || initialReferenceTime; 
                     
                     document.getElementById('profitDisplay').innerText = `FC ${gain.toLocaleString()}`;
                     renderCard(vipId, gain, lastCollect, img);
@@ -144,6 +147,8 @@
                 
                 const nouveauSolde = (parseFloat(user.balance) || 0) + montant;
                 
+                // Met à jour la balance et lastHarvest avec la date actuelle exacte de la récolte
+                // Le prochain cycle de 24h recommencera à partir de ce moment précis
                 await fetch(`${DB_URL}/${userPhone}.json`, {
                     method: 'PATCH',
                     body: JSON.stringify({ 
